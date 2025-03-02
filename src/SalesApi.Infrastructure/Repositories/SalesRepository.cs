@@ -1,25 +1,41 @@
 ﻿using SalesApi.Domain.Sales.AggregatesModel;
-using SalesApi.Domain.SeedWork.Interfaces;
 
 namespace SalesApi.Infrastructure.Repositories;
 
-public class SalesRepository : ISalesRepository
+public class SalesRepository(SalesContext context)
+    : ISalesRepository
 {
-    public IUnitOfWork UnitOfWork => throw new NotImplementedException();
+    public IUnitOfWork UnitOfWork => context;
 
-    public Task<bool> DeleteByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<ICollection<SaleEntity>> GetAllAsync(CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var sales = await context
+                            .Sales
+                            .AsNoTracking()
+                            .ToListAsync(cancellationToken);
+
+        return sales;
     }
 
-    public Task<ICollection<SaleEntity>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<SaleEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var sale = await context
+                            .Sales
+                            .AsNoTracking()
+                            .Where(s => s.EntityId == id)
+                            .SingleOrDefaultAsync(cancellationToken);
+
+        return sale;
     }
 
-    public Task<SaleEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<bool> UpdateAsync(SaleEntity saleToUpdate, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return await Task.Run(() =>
+        {
+            _ = context.Sales.Update(saleToUpdate);
+
+            return true;
+        }, cancellationToken);
     }
 }
 

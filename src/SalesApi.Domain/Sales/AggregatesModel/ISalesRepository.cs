@@ -6,6 +6,6 @@ public interface ISalesRepository : IRepository<SaleEntity>
 
     Task<SaleEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
 
-    Task<bool> DeleteByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<bool> UpdateAsync(SaleEntity saleToUpdate, CancellationToken cancellationToken);
 }
 
