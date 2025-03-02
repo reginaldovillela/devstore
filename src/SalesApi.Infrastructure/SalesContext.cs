@@ -8,11 +8,11 @@ public class SalesContext
 {
     public DbSet<ProductEntity> Products { get; set; }
 
-    public DbSet<CategoryEntity> Categories { get; set; }
+    //public DbSet<CategoryEntity> Categories { get; set; }
 
-    public DbSet<SaleEntity> Sales { get; set; }
+    //public DbSet<SaleEntity> Sales { get; set; }
 
-    public DbSet<ItemSaleEntity> ItemsSale { get; set; }
+    //public DbSet<ItemSaleEntity> ItemsSale { get; set; }
 
     public SalesContext(DbContextOptions<SalesContext> options)
         : base(options)
