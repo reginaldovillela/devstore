@@ -1,20 +1,31 @@
 ﻿using SalesApi.Domain.Products.AggregatesModel;
-using SalesApi.Domain.SeedWork.Interfaces;
 
 namespace SalesApi.Infrastructure.Repositories;
 
-public class ProductsRepository : IProductsRepository
+public class ProductsRepository(SalesContext context)
+    : IProductsRepository
 {
-    public IUnitOfWork UnitOfWork => throw new NotImplementedException();
+    public IUnitOfWork UnitOfWork => context;
 
-    public Task<ICollection<ProductEntity>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<ICollection<ProductEntity>> GetAllAsync(CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var products = await context
+                                .Products
+                                .AsNoTracking()
+                                .ToListAsync(cancellationToken);
+
+        return products;
     }
 
-    public Task<ProductEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<ProductEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var product = await context
+                                .Products
+                                .AsNoTracking()
+                                .Where(p => p.EntityId == id)
+                                .SingleOrDefaultAsync(cancellationToken);
+
+        return product;
     }
 }
 
