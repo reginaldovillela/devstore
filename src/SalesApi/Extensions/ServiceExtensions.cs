@@ -7,6 +7,7 @@ internal static class ServiceExtensions
         var services = builder.Services;
 
         services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
 
         services.Configure<ApiBehaviorOptions>(config =>
         {

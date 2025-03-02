@@ -17,6 +17,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.ApplyMigrations();
+
 app.MapProductsEndpoints();
 
 app.UseHttpsRedirection();

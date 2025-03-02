@@ -6,18 +6,17 @@ USER $APP_UID
 WORKDIR /app
 EXPOSE 8090
 
-
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Directory.Packages.props", "."]
-COPY ["SalesApi/SalesApi.csproj", "SalesApi/"]
-COPY ["SalesApi.Domain/SalesApi.Domain.csproj", "SalesApi.Domain/"]
-COPY ["SalesApi.Infrastructure/SalesApi.Infrastructure.csproj", "SalesApi.Infrastructure/"]
-RUN dotnet restore "./SalesApi/SalesApi.csproj"
+COPY ["src/SalesApi/SalesApi.csproj", "src/SalesApi/"]
+COPY ["src/SalesApi.Domain/SalesApi.Domain.csproj", "src/SalesApi.Domain/"]
+COPY ["src/SalesApi.Infrastructure/SalesApi.Infrastructure.csproj", "src/SalesApi.Infrastructure/"]
+RUN dotnet restore "./src/SalesApi/SalesApi.csproj"
 COPY . .
-WORKDIR "/src/SalesApi"
+WORKDIR "/src/src/SalesApi"
 RUN dotnet build "./SalesApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
