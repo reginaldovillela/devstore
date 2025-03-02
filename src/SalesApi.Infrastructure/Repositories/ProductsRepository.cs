@@ -7,6 +7,17 @@ public class ProductsRepository(SalesContext context)
 {
     public IUnitOfWork UnitOfWork => context;
 
+    public async Task<ProductEntity?> FindByTitleAsync(string title, CancellationToken cancellationToken)
+    {
+        var product = await context
+                              .Products
+                              .AsNoTracking()
+                              .Where(p => p.Title == title)
+                              .SingleOrDefaultAsync(cancellationToken);
+
+        return product;
+    }
+
     public async Task<ICollection<ProductEntity>> GetAllAsync(CancellationToken cancellationToken)
     {
         var products = await context
@@ -26,6 +37,13 @@ public class ProductsRepository(SalesContext context)
                                 .SingleOrDefaultAsync(cancellationToken);
 
         return product;
+    }
+
+    public async Task<bool> InsertAsync(ProductEntity product, CancellationToken cancellationToken)
+    {
+        _ = await context.AddAsync(product, cancellationToken);
+
+        return true;
     }
 }
 

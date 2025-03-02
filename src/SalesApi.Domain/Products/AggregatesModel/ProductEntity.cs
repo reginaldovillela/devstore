@@ -1,26 +1,26 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SalesApi.Domain.Products.AggregatesModel;
+﻿namespace SalesApi.Domain.Products.AggregatesModel;
 
 [Table("products")]
 public class ProductEntity
     : Entity, IAggregateRoot
 {
-    public string Title { get; init; }
+    public string Title { get; private set; } = string.Empty;
 
-    public string Description { get; init; }
+    public string Description { get; private set; } = string.Empty;
 
-    public decimal Price { get; init; }
+    public decimal Price { get; private set; }
 
-    public string Image { get; init; }
+    public string Category { get; private set; } = string.Empty;
+
+    public string Image { get; private set; } = string.Empty;
 
     #region "ef requirements and relations"
 
-    [ForeignKey("Category")]
-    [Required]
-    public Guid CategoryId { get; private init; }
+    //[ForeignKey("Category")]
+    //[Required]
+    //public Guid CategoryId { get; private init; }
 
-    public CategoryEntity Category { get; private set; } = null!;
+    //public CategoryEntity Category { get; private set; } = null!;
 
 #pragma warning disable CS8618
     protected ProductEntity() { }
@@ -28,4 +28,56 @@ public class ProductEntity
 
     #endregion
 
+    public ProductEntity(string title, 
+                         string description, 
+                         decimal price, 
+                         string category, 
+                         string image)
+    {
+        SetTitle(title);
+        SetDescription(description);
+        SetPrice(price);
+        SetCategory(category);
+        SetImage(image);
+    }
+
+    private void SetTitle(string title)
+    {
+        if (string.IsNullOrEmpty(title))
+            throw new InvalidOperationException("Title cannot be null");
+
+        if (title.Length < 10)
+            throw new InvalidOperationException("Title must hava 10 or more characters");
+
+        Title = title;
+    }
+
+    private void SetDescription(string description)
+    {
+        if (string.IsNullOrEmpty(description))
+            throw new InvalidOperationException("Description cannot be null");
+
+        if (description.Length < 15)
+            throw new InvalidOperationException("Description must have 15 or more characters");
+
+        Description = description;
+    }
+
+    private void SetPrice(decimal price)
+    {
+        if (price <= 0)
+            throw new InvalidOperationException("Price must be more than 0");
+
+        Price = price;
+    }
+
+    private void SetCategory(string category)
+    {
+        Category = category;
+    }
+
+    private void SetImage(string image)
+    {
+        Image = image;
+    }
 }
