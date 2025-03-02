@@ -12,7 +12,7 @@ public static class InfrastructureDependecy
     {
         services.AddDbContext<SalesContext>(options =>
         {
-            options.UseNpgsql(configuration.GetConnectionString("SalesConnection"));
+            options.UseNpgsql(configuration.GetConnectionString("SalesApiDb"));
         });
 
         services.AddScoped<IProductsRepository, ProductsRepository>();
