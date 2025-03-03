@@ -1,9 +1,11 @@
-﻿using SalesApi.Application.Sales.Models.Result;
+﻿using SalesApi.Application.Sales.Models.Request;
+using SalesApi.Application.Sales.Models.Result;
 using SalesApi.Domain.Sales.AggregatesModel;
 
 namespace SalesApi.Application.Sales.Commands;
 
 public class CreateSaleCommandHandler(ILogger<CreateSaleCommandHandler> logger,
+                                      IMapper mapper,
                                       ISalesRepository salesRepository) 
     : IRequestHandler<CreateSaleCommand, Sale>
 {
@@ -11,21 +13,7 @@ public class CreateSaleCommandHandler(ILogger<CreateSaleCommandHandler> logger,
     {
         var sale = await CreateAndInsertNewSaleAsync(request, cancellationToken);
 
-        return new Sale(sale.EntityId,
-                        sale.SaleNumber.ToString(),
-                        sale.SaleDate,
-                        sale.CustomerId,
-                        sale.BranchId,
-                        sale.Total,
-                        sale.IsCancelled,
-                        [.. sale.SaleItems.Select(i=> new SaleItem(i.EntityId,
-                                                                   i.ProductId,
-                                                                   i.Quantity,
-                                                                   i.UnitPrice,
-                                                                   i.TotalDiscount,
-                                                                   i.Total,
-                                                                   i.SaleId,
-                                                                   i.IsCancelled))]);
+        return mapper.Map<SaleEntity, Sale>(sale);
     }
 
     private async Task<SaleEntity> CreateAndInsertNewSaleAsync(CreateSaleCommand newSaleRequest, CancellationToken cancellationToken)
@@ -47,21 +35,14 @@ public class CreateSaleCommandHandler(ILogger<CreateSaleCommandHandler> logger,
         return newSale;
     }
 
-    private static SaleEntity CreateNewSaleObject(CreateSaleCommand newSaleRequest)
+    private SaleEntity CreateNewSaleObject(CreateSaleCommand newSaleRequest)
     {
-        var newSale = new SaleEntity(newSaleRequest.SaleNumber,
-                                             newSaleRequest.SaleDate,
-                                             newSaleRequest.CustomerId,
-                                             newSaleRequest.BranchId);
+        var newSale = mapper.Map<CreateSaleCommand, SaleEntity>(newSaleRequest);
 
         foreach (var saleItemRequest in newSaleRequest.Items)
-        {
-            var saleItem = new SaleItemEntity(saleItemRequest.ProductId,
-                                              saleItemRequest.Quantity,
-                                              saleItemRequest.UnitPrice);
-
-            newSale.AddSaleItem(saleItem);
-        }
+            newSale.AddSaleItem(
+                mapper.Map<Item, SaleItemEntity>(saleItemRequest)
+            );
 
         return newSale;
     }

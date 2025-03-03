@@ -26,6 +26,9 @@ internal static class ServiceExtensions
         {
             config.RegisterServicesFromAssemblyContaining<Program>();
         });
+
+        // automapper
+        services.AddAutoMapper(typeof(Program));
     }
 }
 

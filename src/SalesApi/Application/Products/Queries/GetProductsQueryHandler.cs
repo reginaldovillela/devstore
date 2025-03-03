@@ -4,6 +4,7 @@ using SalesApi.Domain.Products.AggregatesModel;
 namespace SalesApi.Application.Products.Queries;
 
 public class GetProductsQueryHandler(ILogger<GetProductsQueryHandler> logger,
+                                     IMapper mapper,
                                      IProductsRepository productsRepository) : IRequestHandler<GetProductsQuery, Product[]>
 {
     public async Task<Product[]> Handle(GetProductsQuery request, CancellationToken cancellationToken)
@@ -12,11 +13,6 @@ public class GetProductsQueryHandler(ILogger<GetProductsQueryHandler> logger,
 
         logger.LogInformation("Query did successful. Amount of {@count} records found", products.Count);
 
-        return [.. products.Select(p => new Product(p.EntityId,
-                                                    p.Title,
-                                                    p.Description,
-                                                    p.Price,
-                                                    p.Category,
-                                                    p.Image))];
+        return mapper.Map<ProductEntity[], Product[]>([.. products]);
     }
 }

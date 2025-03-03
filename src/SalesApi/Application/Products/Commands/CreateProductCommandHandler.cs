@@ -1,11 +1,11 @@
-﻿using MediatR;
-using SalesApi.Application.Products.Models.Result;
+﻿using SalesApi.Application.Products.Models.Result;
 using SalesApi.Domain.Products.AggregatesModel;
 using System.Data;
 
 namespace SalesApi.Application.Products.Commands;
 
 public class CreateProductCommandHandler(ILogger<CreateProductCommandHandler> logger,
+                                         IMapper mapper,
                                          IProductsRepository productsRepository) : IRequestHandler<CreateProductCommand, Product>
 {
     public async Task<Product> Handle(CreateProductCommand request, CancellationToken cancellationToken)
@@ -14,12 +14,7 @@ public class CreateProductCommandHandler(ILogger<CreateProductCommandHandler> lo
 
         var product = await CreateAndInsertNewProductAsync(request, cancellationToken);
 
-        return new Product(product.EntityId,
-                           product.Title,
-                           product.Description,
-                           product.Price,
-                           product.Category,
-                           product.Image);
+        return mapper.Map<ProductEntity, Product>(product);
     }
 
     private async Task CheckIfProductAlreadyExistsAsync(CreateProductCommand newProductRequest, CancellationToken cancellationToken)
@@ -35,11 +30,7 @@ public class CreateProductCommandHandler(ILogger<CreateProductCommandHandler> lo
 
     private async Task<ProductEntity> CreateAndInsertNewProductAsync(CreateProductCommand newProductRequest, CancellationToken cancellationToken)
     {
-        var newProduct = new ProductEntity(newProductRequest.Title,
-                                           newProductRequest.Description,
-                                           newProductRequest.Price,
-                                           newProductRequest.Category,
-                                           newProductRequest.Image);
+        var newProduct = mapper.Map<CreateProductCommand, ProductEntity>(newProductRequest);
 
         var success = await productsRepository.InsertAsync(newProduct, cancellationToken);
 
