@@ -19,12 +19,13 @@ public class CreateSaleCommandHandler(ILogger<CreateSaleCommandHandler> logger,
                         sale.Total,
                         sale.IsCancelled,
                         [.. sale.SaleItems.Select(i=> new SaleItem(i.EntityId,
-                                                               i.ProductId,
-                                                               i.Quantity,
-                                                               i.Discount,
-                                                               i.Total,
-                                                               i.SaleId,
-                                                               i.IsCancelled))]);
+                                                                   i.ProductId,
+                                                                   i.Quantity,
+                                                                   i.UnitPrice,
+                                                                   i.TotalDiscount,
+                                                                   i.Total,
+                                                                   i.SaleId,
+                                                                   i.IsCancelled))]);
     }
 
     private async Task<SaleEntity> CreateAndInsertNewSaleAsync(CreateSaleCommand newSaleRequest, CancellationToken cancellationToken)

@@ -1,17 +1,24 @@
 ﻿namespace SalesApi.Domain.Products.AggregatesModel;
 
+[Index(nameof(EntityId), IsUnique = true)]
+[Index(nameof(Title), IsUnique = true)]
 [Table("products")]
 public class ProductEntity
     : Entity, IAggregateRoot
 {
+    [Required]
     public string Title { get; private set; } = string.Empty;
 
+    [Required]
     public string Description { get; private set; } = string.Empty;
 
+    [Required]
     public decimal Price { get; private set; }
 
+    [Required]
     public string Category { get; private set; } = string.Empty;
 
+    [Required]
     public string Image { get; private set; } = string.Empty;
 
     #region "ef requirements and relations"
@@ -28,10 +35,10 @@ public class ProductEntity
 
     #endregion
 
-    public ProductEntity(string title, 
-                         string description, 
-                         decimal price, 
-                         string category, 
+    public ProductEntity(string title,
+                         string description,
+                         decimal price,
+                         string category,
                          string image)
     {
         SetTitle(title);
@@ -47,7 +54,7 @@ public class ProductEntity
             throw new InvalidOperationException("Title cannot be null");
 
         if (title.Length < 10)
-            throw new InvalidOperationException("Title must hava 10 or more characters");
+            throw new InvalidOperationException("Title must have 10 or more characters");
 
         Title = title;
     }

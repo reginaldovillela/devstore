@@ -11,6 +11,7 @@ public class SalesRepository(SalesContext context)
     {
         var sales = await context
                             .Sales
+                            .Include(i => i.SaleItems)
                             .AsNoTracking()
                             .ToListAsync(cancellationToken);
 
@@ -21,6 +22,7 @@ public class SalesRepository(SalesContext context)
     {
         var sale = await context
                             .Sales
+                            .Include(i => i.SaleItems)
                             .AsNoTracking()
                             .Where(s => s.EntityId == id)
                             .SingleOrDefaultAsync(cancellationToken);

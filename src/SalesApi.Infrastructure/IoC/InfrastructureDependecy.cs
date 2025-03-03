@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SalesApi.Domain.Products.AggregatesModel;
+using SalesApi.Domain.Sales.AggregatesModel;
 using SalesApi.Infrastructure.Repositories;
 
 namespace SalesApi.Infrastructure.IoC;
@@ -16,6 +17,7 @@ public static class InfrastructureDependecy
         });
 
         services.AddScoped<IProductsRepository, ProductsRepository>();
+        services.AddScoped<ISalesRepository, SalesRepository>();
         services.AddScoped<SalesContext>();
     }
 }
