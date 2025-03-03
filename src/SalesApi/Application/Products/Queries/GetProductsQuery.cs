@@ -3,4 +3,3 @@
 namespace SalesApi.Application.Products.Queries;
 
 public record GetProductsQuery : IRequest<Product[]>;
-

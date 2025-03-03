@@ -6,20 +6,22 @@ namespace SalesApi.Domain.Sales.AggregatesModel;
 public class SaleEntity
     : Entity, IAggregateRoot
 {
-    public uint SaleNumber { get; init; }
+    public string SaleNumber { get; init; }
 
-    public DateTime SaleDate { get; init; }
+    public DateTime SaleDate { get; private set; }
 
     public Guid CustomerId { get; init; }
 
     public Guid BranchId { get; init; }
 
-    public bool Cancelled { get; init; } = false;
+    public bool IsCancelled { get; private set; } = false;
+
+    public decimal Total => CalculateTotalToPay();
 
     #region "ef requirements and relations"
 
-    [InverseProperty("ItemsSale")]
-    public ICollection<ItemSaleEntity> Items { get; private set; } = null!;
+    [InverseProperty("sale")]
+    public ICollection<SaleItemEntity> SaleItems { get; private set; } = null!;
 
 #pragma warning disable CS8618
     protected SaleEntity() { }
@@ -27,12 +29,32 @@ public class SaleEntity
 
     #endregion
 
-    public SaleEntity(DateTime saleDate, Guid customerId, Guid branchId)
+    public SaleEntity(string saleNumber, DateTime saleDate, Guid customerId, Guid branchId)
     {
-        SaleNumber = GenerateSaleNumber();
-        SaleDate = saleDate;
+        SaleNumber = saleNumber;
+        SetSaleDate(saleDate);
         CustomerId = customerId;
         BranchId = branchId;
+    }
+
+    public void AddSaleItem(SaleItemEntity itemSale)
+    {
+        var item = SaleItems.SingleOrDefault(i => i.ProductId == itemSale.ProductId);
+
+        if (item is null)
+        {
+            SaleItems.Add(itemSale);
+        }
+        else
+        {
+            SaleItems.Remove(item);
+            SaleItems.Add(item);
+        }
+    }
+
+    public void CancelSale()
+    {
+        IsCancelled = true;
     }
 
     private static uint GenerateSaleNumber()
@@ -45,19 +67,24 @@ public class SaleEntity
         uint trueRandom = BitConverter.ToUInt32(randomBytes, 0);
 
         return trueRandom;
-
-
-        //return (uint)new Random().Next(1, 999999);
     }
 
-    public void AddItemSale(ItemSaleEntity itemSale)
+    private void SetSaleDate(DateTime saleDate)
     {
+        if (saleDate.Date > DateTime.Now)
+            throw new InvalidOperationException("Sale order can't be future");
 
+        SaleDate = saleDate;
     }
 
-    public void RemoveItemSale(ItemSaleEntity itemSale)
+    private decimal CalculateTotalToPay()
     {
+        var amountToPay = 0m;
 
+        foreach (var i in SaleItems)
+            amountToPay += i.Total;
+
+        return amountToPay;
     }
 }
 

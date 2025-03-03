@@ -28,8 +28,8 @@ public class CreateProductCommandHandler(ILogger<CreateProductCommandHandler> lo
 
         if (product is not null)
         {
-            logger.LogInformation("Já existe um produto com o título: {@Title}", newProductRequest.Title);
-            throw new ConstraintException($"Já existe um produto com o título: {newProductRequest.Title}");
+            logger.LogError("Product already exists by title: {@Title}", newProductRequest.Title);
+            throw new ConstraintException($"Product already exists by title: {newProductRequest.Title}");
         }
     }
 
@@ -45,16 +45,14 @@ public class CreateProductCommandHandler(ILogger<CreateProductCommandHandler> lo
 
         if (!success)
         {
-            logger.LogInformation("Não foi possível incluir o produto");
-            throw new InvalidOperationException("Não foi possível incluir o produto");
+            logger.LogError("It wasn't to insert the product: {@Title}", newProduct.Title);
+            throw new InvalidOperationException($"It wasn't to insert the product: {newProduct.Title}");
         }
 
         _ = await productsRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation("Criando o registro do produto: {@Product}", newProduct);
+        logger.LogInformation("Created a new product: {@Product}", newProduct);
 
         return newProduct;
     }
-
 }
-
