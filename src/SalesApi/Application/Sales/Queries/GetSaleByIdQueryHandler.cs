@@ -4,6 +4,7 @@ using SalesApi.Domain.Sales.AggregatesModel;
 namespace SalesApi.Application.Sales.Queries;
 
 public class GetSaleByIdQueryHandler(ILogger<GetSaleByIdQueryHandler> logger,
+                                     IMapper mapper,
                                      ISalesRepository salesRepository) 
     : IRequestHandler<GetSaleByIdQuery, Sale?>
 {
@@ -17,20 +18,6 @@ public class GetSaleByIdQueryHandler(ILogger<GetSaleByIdQueryHandler> logger,
             return null;
         }
 
-        return new Sale(sale.EntityId,
-                        sale.SaleNumber.ToString(),
-                        sale.SaleDate,
-                        sale.CustomerId,
-                        sale.BranchId,
-                        sale.Total,
-                        sale.IsCancelled,
-                        [.. sale.SaleItems.Select(i=> new SaleItem(i.EntityId,
-                                                                   i.ProductId,
-                                                                   i.Quantity,
-                                                                   i.UnitPrice,
-                                                                   i.TotalDiscount,
-                                                                   i.Total,
-                                                                   i.SaleId,
-                                                                   i.IsCancelled))]);
+        return mapper.Map<SaleEntity, Sale>(sale);
     }
 }

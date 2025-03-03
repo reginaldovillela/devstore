@@ -4,6 +4,7 @@ using SalesApi.Domain.Products.AggregatesModel;
 namespace SalesApi.Application.Products.Queries;
 
 public class GetProductByIdQueryHandler(ILogger<GetProductByIdQueryHandler> logger,
+                                        IMapper mapper,
                                         IProductsRepository productsRepository)
     : IRequestHandler<GetProductByIdQuery, Product?>
 {
@@ -17,11 +18,6 @@ public class GetProductByIdQueryHandler(ILogger<GetProductByIdQueryHandler> logg
             return null;
         }
 
-        return new Product(product.EntityId,
-                           product.Title,
-                           product.Description,
-                           product.Price,
-                           product.Category,
-                           product.Image);
+        return mapper.Map<ProductEntity, Product>(product);
     }
 }
