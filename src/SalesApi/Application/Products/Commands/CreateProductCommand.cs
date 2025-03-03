@@ -1,5 +1,4 @@
-﻿using MediatR;
-using SalesApi.Application.Products.Models.Result;
+﻿using SalesApi.Application.Products.Models.Result;
 
 namespace SalesApi.Application.Products.Commands;
 

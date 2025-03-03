@@ -20,6 +20,7 @@ if (app.Environment.IsDevelopment())
 app.ApplyMigrations();
 
 app.MapProductsEndpoints();
+app.MapSalesEndpoints();
 
 app.UseHttpsRedirection();
 await app.RunAsync();
