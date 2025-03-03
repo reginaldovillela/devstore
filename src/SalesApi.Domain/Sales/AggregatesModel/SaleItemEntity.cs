@@ -1,22 +1,31 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace SalesApi.Domain.Sales.AggregatesModel;
 
-namespace SalesApi.Domain.Sales.AggregatesModel;
-
+[Index(nameof(EntityId), IsUnique = true)]
+[Index(nameof(ProductId))]
 [Table("sales_items")]
 public class SaleItemEntity
     : Entity
 {
+    [Required]
     public Guid ProductId { get; init; }
 
-    public ushort Quantity { get; private set; }
+    [Required]
+    public ushort Quantity { get; private set; } = 0;
 
-    public decimal UnitPrice { get; init; }
+    [Required]
+    public decimal UnitPrice { get; private set; } = 0;
 
-    public decimal Discount { get; private set; } = 0;
+    [Required]
+    public int PercentDiscount { get; private set; } = 0;
 
-    public decimal Total => CalculateTotalToPay();
-
+    [Required]
     public bool IsCancelled { get; private set; } = false;
+
+    [NotMapped]
+    public decimal TotalDiscount => CalculateTotalDiscount();
+
+    [NotMapped]
+    public decimal Total => CalculateTotalToPay();
 
     #region "ef requirements and relations"
 
@@ -32,16 +41,17 @@ public class SaleItemEntity
 
     #endregion
 
-    public SaleItemEntity(Guid productId, ushort quantity, decimal unitPrice )
+    public SaleItemEntity(Guid productId, ushort quantity, decimal unitPrice)
     {
         ProductId = productId;
         SetQuantity(quantity);
-        UnitPrice = unitPrice;
+        SetUnitPrice(unitPrice);
     }
 
-    public void IncreaseQuantity()
+    public void IncreaseQuantity(ushort quantityToAdd = 1)
     {
-        SetQuantity(Quantity++);
+        var newQuantity = (ushort)(Quantity + quantityToAdd);
+        SetQuantity(newQuantity);
     }
 
     private void SetQuantity(ushort quantity)
@@ -51,23 +61,37 @@ public class SaleItemEntity
 
         Quantity = quantity;
 
-        CalculeDiscount();
+        CalculePercentDiscount();
     }
 
-    private void CalculeDiscount()
+    private void SetUnitPrice(decimal unitPrice)
+    {
+        if (unitPrice <= 0)
+            throw new InvalidOperationException("Unit Price cannot be equal 0 or less than 0");
+
+        UnitPrice = unitPrice;
+    }
+
+    private void CalculePercentDiscount()
     {
         if (Quantity >= 4)
-            Discount = 10;
+            PercentDiscount = 10;
 
         if (Quantity >= 10)
-            Discount = 0;
+            PercentDiscount = 20;
     }
-    
+
+    private decimal CalculateTotalDiscount()
+    {
+        var discount = (decimal)PercentDiscount / 100;
+        var totalWithoutDiscount = UnitPrice * Quantity;
+        return discount * totalWithoutDiscount;
+    }
+
     private decimal CalculateTotalToPay()
     {
-        var discont = Discount / 100;
-
-        return (UnitPrice * Quantity) * discont;
+        var totalWithoutDiscount = UnitPrice * Quantity;
+        return totalWithoutDiscount - TotalDiscount;
     }
 }
 

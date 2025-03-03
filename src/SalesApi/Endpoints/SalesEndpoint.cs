@@ -23,11 +23,43 @@ public static class SalesEndpoint
         var api = app.MapGroup(BaseEndpoint)
                      .WithTags(TagEndpoint);
 
+        api.MapGet("/", GetSalesAsync);
+
         api.MapGet("/{id:guid}", GetSaleByIdAsync);
 
         api.MapPost("/", CreateSaleAsync);
 
         api.MapDelete("/{id:guid}", CancelSaleByIdAsync);
+    }
+
+    private static async Task<Results<Ok<AnySuccessWithDataResult<Sale[]>>,
+                              NotFound<AnyFailureResult>,
+                              BadRequest<AnyFailureResult>>> GetSalesAsync(
+        [AsParameters] SalesEndpointServices services)
+    {
+        try
+        {
+            var query = new GetSalesQuery();
+            var sales = await services.Mediator.Send(query);
+
+            if (sales is null || sales.Length == 0)
+                return TypedResults.NotFound(
+                    new AnyFailureResult(HttpStatusCode.NotFound.ToString(),
+                                         "Nothing to show",
+                                         "We can't find any records at our database. Please, try it again."));
+
+            return TypedResults.Ok(
+                new AnySuccessWithDataResult<Sale[]>(HttpStatusCode.OK.ToString(),
+                                                     "We found some date here",
+                                                     sales));
+        }
+        catch (Exception ex)
+        {
+            return TypedResults.BadRequest(
+                new AnyFailureResult(HttpStatusCode.BadRequest.ToString(),
+                                     "Oops... something wrong it happend",
+                                     ex.Message));
+        }
     }
 
     private static async Task<Results<Ok<AnySuccessWithDataResult<Sale>>,

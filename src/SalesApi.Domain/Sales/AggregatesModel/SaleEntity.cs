@@ -1,21 +1,27 @@
-﻿using System.Security.Cryptography;
+﻿namespace SalesApi.Domain.Sales.AggregatesModel;
 
-namespace SalesApi.Domain.Sales.AggregatesModel;
-
+[Index(nameof(EntityId), IsUnique = true)]
+[Index(nameof(SaleNumber), IsUnique = true)]
 [Table("sales")]
 public class SaleEntity
     : Entity, IAggregateRoot
 {
+    [Required]
     public string SaleNumber { get; init; }
 
+    [Required]
     public DateTime SaleDate { get; private set; }
 
+    [Required]
     public Guid CustomerId { get; init; }
 
+    [Required]
     public Guid BranchId { get; init; }
 
+    [Required]
     public bool IsCancelled { get; private set; } = false;
 
+    [NotMapped]
     public decimal Total => CalculateTotalToPay();
 
     #region "ef requirements and relations"
@@ -35,38 +41,25 @@ public class SaleEntity
         SetSaleDate(saleDate);
         CustomerId = customerId;
         BranchId = branchId;
+        SaleItems = [];
     }
 
     public void AddSaleItem(SaleItemEntity itemSale)
     {
         var item = SaleItems.SingleOrDefault(i => i.ProductId == itemSale.ProductId);
 
-        if (item is null)
+        if (item is not null)
         {
-            SaleItems.Add(itemSale);
-        }
-        else
-        {
+            itemSale.IncreaseQuantity(item.Quantity);
             SaleItems.Remove(item);
-            SaleItems.Add(item);
         }
+
+        SaleItems.Add(itemSale);
     }
 
     public void CancelSale()
     {
         IsCancelled = true;
-    }
-
-    private static uint GenerateSaleNumber()
-    {
-        var randomBytes = new byte[4];
-
-        using var rng = RandomNumberGenerator.Create();
-
-        rng.GetBytes(randomBytes);
-        uint trueRandom = BitConverter.ToUInt32(randomBytes, 0);
-
-        return trueRandom;
     }
 
     private void SetSaleDate(DateTime saleDate)
