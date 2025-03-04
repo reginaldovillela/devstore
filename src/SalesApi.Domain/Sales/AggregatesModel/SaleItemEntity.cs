@@ -54,7 +54,7 @@ public class SaleItemEntity
         SetQuantity(newQuantity);
     }
 
-    private void SetQuantity(ushort quantity)
+    public void SetQuantity(ushort quantity)
     {
         if (quantity > 20)
             throw new InvalidOperationException("You can buy only 20 pices of a item");
@@ -64,7 +64,7 @@ public class SaleItemEntity
         CalculePercentDiscount();
     }
 
-    private void SetUnitPrice(decimal unitPrice)
+    public void SetUnitPrice(decimal unitPrice)
     {
         if (unitPrice <= 0)
             throw new InvalidOperationException("Unit Price cannot be equal 0 or less than 0");

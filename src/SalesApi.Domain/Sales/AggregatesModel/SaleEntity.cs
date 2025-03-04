@@ -62,7 +62,7 @@ public class SaleEntity
         IsCancelled = true;
     }
 
-    private void SetSaleDate(DateTime saleDate)
+    public void SetSaleDate(DateTime saleDate)
     {
         if (saleDate.Date > DateTime.Now)
             throw new InvalidOperationException("Sale order can't be future");
