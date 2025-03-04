@@ -1,4 +1,6 @@
-﻿namespace SalesApi.Extensions;
+﻿using SalesApi.Services;
+
+namespace SalesApi.Extensions;
 
 internal static class ServiceExtensions
 {
@@ -29,6 +31,20 @@ internal static class ServiceExtensions
 
         // automapper
         services.AddAutoMapper(typeof(Program));
+
+        services.AddMassTransit(bus =>
+        {
+            bus.SetKebabCaseEndpointNameFormatter();
+            bus.AddConsumer<GetProductByIdConsumer>().Endpoint(
+                e => e.Name = "get-product-by-id");
+            bus.AddRequestClient<GetProductByIdRequest>(
+                new Uri("exchange:get-product-by-id"));
+
+            bus.UsingInMemory((context, x) =>
+            {
+                x.ConfigureEndpoints(context);
+            });
+        });
     }
 }
 

@@ -48,7 +48,7 @@ public class ProductEntity
         SetImage(image);
     }
 
-    private void SetTitle(string title)
+    public void SetTitle(string title)
     {
         if (string.IsNullOrEmpty(title))
             throw new InvalidOperationException("Title cannot be null");
@@ -59,7 +59,7 @@ public class ProductEntity
         Title = title;
     }
 
-    private void SetDescription(string description)
+    public void SetDescription(string description)
     {
         if (string.IsNullOrEmpty(description))
             throw new InvalidOperationException("Description cannot be null");
@@ -70,7 +70,7 @@ public class ProductEntity
         Description = description;
     }
 
-    private void SetPrice(decimal price)
+    public void SetPrice(decimal price)
     {
         if (price <= 0)
             throw new InvalidOperationException("Price must be more than 0");
@@ -78,12 +78,12 @@ public class ProductEntity
         Price = price;
     }
 
-    private void SetCategory(string category)
+    public void SetCategory(string category)
     {
         Category = category;
     }
 
-    private void SetImage(string image)
+    public void SetImage(string image)
     {
         Image = image;
     }

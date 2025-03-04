@@ -1,12 +1,14 @@
 ﻿using SalesApi.Application.Sales.Models.Request;
 using SalesApi.Application.Sales.Models.Result;
 using SalesApi.Domain.Sales.AggregatesModel;
+using SalesApi.Services;
 
 namespace SalesApi.Application.Sales.Commands;
 
 public class CreateSaleCommandHandler(ILogger<CreateSaleCommandHandler> logger,
                                       IMapper mapper,
-                                      ISalesRepository salesRepository) 
+                                      ISalesRepository salesRepository,
+                                      IRequestClient<GetProductByIdRequest> productConsumer)
     : IRequestHandler<CreateSaleCommand, Sale>
 {
     public async Task<Sale> Handle(CreateSaleCommand request, CancellationToken cancellationToken)
@@ -18,7 +20,7 @@ public class CreateSaleCommandHandler(ILogger<CreateSaleCommandHandler> logger,
 
     private async Task<SaleEntity> CreateAndInsertNewSaleAsync(CreateSaleCommand newSaleRequest, CancellationToken cancellationToken)
     {
-        var newSale = CreateNewSaleObject(newSaleRequest);
+        var newSale = await CreateNewSaleObject(newSaleRequest);
 
         var success = await salesRepository.InsertAsync(newSale, cancellationToken);
 
@@ -35,15 +37,33 @@ public class CreateSaleCommandHandler(ILogger<CreateSaleCommandHandler> logger,
         return newSale;
     }
 
-    private SaleEntity CreateNewSaleObject(CreateSaleCommand newSaleRequest)
+    private async Task<SaleEntity> CreateNewSaleObject(CreateSaleCommand newSaleRequest)
     {
         var newSale = mapper.Map<CreateSaleCommand, SaleEntity>(newSaleRequest);
 
         foreach (var saleItemRequest in newSaleRequest.Items)
             newSale.AddSaleItem(
-                mapper.Map<Item, SaleItemEntity>(saleItemRequest)
+                await ValidateAndCreateSaleItemAsync(saleItemRequest)
             );
 
         return newSale;
+    }
+
+    private async Task<SaleItemEntity> ValidateAndCreateSaleItemAsync(Item item)
+    {
+        var request = new GetProductByIdRequest(item.ProductId);
+        var response = (await productConsumer.GetResponse<GetProductByIdResponse>(request)).Message;
+
+        if (response.HasError)
+        {
+            logger.LogError("It was not possible to add product @{Id} > @{Error}", item.ProductId, response.ErrorMessage);
+            throw new InvalidOperationException($"It was not possible to add product {item.ProductId} > {response.ErrorMessage}");
+        }
+
+        var product = response.Product!;
+
+        return new SaleItemEntity(product.EntityId,
+                                  item.Quantity,
+                                  product.Price);
     }
 }
