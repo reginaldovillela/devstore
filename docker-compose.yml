@@ -48,3 +48,5 @@ networks:
   evaluation-network:
     name: evaluation-network
     driver: bridge
+    external: true
+  
